@@ -1,0 +1,23 @@
+name = "otwarty-trener-landing"
+main = "src/index.tsx"
+compatibility_date = "2026-04-08"
+
+[build]
+[build.upload]
+
+# Treat .css imports as raw text strings
+[[rules]]
+type = "Text"
+globs = ["**/*.css"]
+fallthrough = true
+
+# Ta sama D1 co ceidg-sync — landing czyta, nie pisze (poza opt-out).
+[[d1_databases]]
+binding = "DB"
+database_name = "ceidg-leads"
+database_id = "1bce090e-035b-46ee-ab5a-d772ec975c24"
+
+# KV dla rate-limitu /opt-out i cache'u stron
+[[kv_namespaces]]
+binding = "CACHE"
+id = "ce86b6956b3b46419a7119d1fda95cd3"

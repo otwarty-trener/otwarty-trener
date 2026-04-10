@@ -1,0 +1,3 @@
+CEIDG_TOKEN=wklej-tutaj-token-z-dane.biznes.gov.pl
+GITHUB_TOKEN=wklej-tutaj-PAT-z-uprawnieniami-repo
+ADMIN_SECRET=wygeneruj-przez-openssl-rand-base64-32

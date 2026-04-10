@@ -1,0 +1,33 @@
+name = "ceidg-sync"
+main = "src/index.ts"
+compatibility_date = "2026-04-08"
+
+# Kody PKD do syncu — CSV. Zmiana bez rebuilda kodu: dopisz/usuń kod, deploy.
+# Domyślna lista trenerska (jeśli var niezdefiniowany) siedzi w src/leads.ts.
+[vars]
+PKD_CODES = "96.04.Z,85.51.Z,93.13.Z"
+
+# Cron: co godzinę — jeden chunk synchronizacji CEIDG.
+# Sync jest kursor-based (pozycja w KV), każdy tick robi ~15 calls do CEIDG
+# i kontynuuje tam gdzie poprzedni skończył. Pełny przebieg wszystkich PKD
+# zajmuje kilkanaście godzin, po czym kursor wraca na start.
+# Godzinny interwał = 24 wywołania workera/dobę, dobrze pod free-plan limitami
+# CF (100k req/d) i CEIDG (1000 req/h).
+[triggers]
+crons = ["0 * * * *"]
+
+# D1 — baza leadów
+[[d1_databases]]
+binding = "DB"
+database_name = "ceidg-leads"
+database_id = "1bce090e-035b-46ee-ab5a-d772ec975c24"
+migrations_dir = "migrations"
+
+# KV — cache odpowiedzi CEIDG (TTL ~1h) + rate-limit per IP
+[[kv_namespaces]]
+binding = "CACHE"
+id = "ce86b6956b3b46419a7119d1fda95cd3"
+
+# Sekrety (ustaw przez `wrangler secret put`):
+#   CEIDG_TOKEN       — token z dane.biznes.gov.pl
+#   GITHUB_TOKEN      — PAT do tworzenia repo w org otwarty-trener (na start; docelowo GitHub App)
