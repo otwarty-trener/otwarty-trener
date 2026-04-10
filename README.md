@@ -42,12 +42,14 @@ Otwarta baza trenerów personalnych w Polsce. Dane z CEIDG, bezpłatny dostęp.
 
 ## Design system
 
-`@press2ai/theme-specialist-glossy@0.11.1` — classless CSS + pure template functions.
+`@press2ai/theme-specialist-glossy@0.11.9` — classless CSS + pure template functions.
 
 - **Hono:** `composeCss('hero', 'statBar', ...)` — składa CSS z użytych komponentów
 - **Astro:** `import glossy.css` — pełny bundle
 - **Bloki:** `catalogHero`, `catalogGrid`, `statBar`, `steps`, `profileCard`, `profileArticle`, `pagination`
 - **Zero klas CSS** — selektory strukturalne (`section:has`, `[itemscope]`, `[aria-label]`)
+- **Layout:** `main` = container (1080px, centered). Komponenty nie overridują main — ustawiają tylko swój max-width
+- **Profile article:** Swiss design — surowa typografia, ostre linie, bez cieni/zaokrągleń
 
 ## Endpointy
 

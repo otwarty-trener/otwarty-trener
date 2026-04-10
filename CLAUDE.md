@@ -18,6 +18,8 @@
 - **Classless** — zero klas CSS, selektory strukturalne (section:has, aria-label, itemscope)
 - **Jeden raz** — przeczytaj caly CSS, zaplanuj, napisz raz, publish raz. Nie iteruj.
 - **Komponentowy** — kazdy komponent niesie swoj CSS w `src/styles/*.ts`, skladanie przez `composeCss()`
+- **Layout w base.ts** — main (container, margin-inline:auto) to jedyne zrodlo prawdy. Komponenty NIE overriduja main. Komponent ustawia tylko swoj wlasny max-width.
+- **Scoped selektory** — kazdy komponent celuje w swoj kontekst, nie w gole elementy. Np. profileCard: `section:has(> article[itemscope]) > article[itemscope]`, forms: `form:not([role="search"]) label`
 
 ## Git
 
