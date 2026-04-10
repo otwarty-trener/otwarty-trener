@@ -12,7 +12,22 @@ Otwarty katalog trenerów personalnych w Polsce. Dane z publicznego rejestru CEI
 
 Z CEIDG (dane.biznes.gov.pl) — publiczny rejestr firm. Pobieramy: imię, nazwisko, nazwa firmy, miasto, NIP, kody PKD. Nie pobieramy: e-mail, telefon, adres zamieszkania, REGON.
 
-Szukamy też publicznych fanpage'y i stron firmowych. Tylko to co widzi każdy w internecie.
+## Linki do profili społecznościowych
+
+Wyszukujemy w Google publiczne fanpage'e i strony firmowe trenerów (Facebook, Instagram, YouTube itp.). Zapisujemy wyłącznie **link do profilu** i tytuł strony z wyników wyszukiwarki.
+
+Czego **nie robimy**:
+- Nie wchodzimy na Twój profil automatycznie (zero scrapingu)
+- Nie pobieramy zdjęć, postów, listy znajomych ani żadnych treści z portalu
+- Nie tworzymy kopii Twojego profilu
+
+Co **robimy**:
+- Wyszukujemy w Google po imieniu, nazwisku i mieście z CEIDG
+- Dopasowujemy znaleziony link do wpisu w katalogu
+- Admin ręcznie weryfikuje i zatwierdza lub odrzuca każde dopasowanie
+- Na wizytówce wyświetlamy wyłącznie link „Zobacz profil na Facebook" (lub innym portalu)
+
+Jeśli nie chcesz, żeby link do Twojego profilu widniał w katalogu — skorzystaj z [/opt-out](/opt-out). Usuniemy natychmiast, bez pytań.
 
 ## Otwarte dane
 

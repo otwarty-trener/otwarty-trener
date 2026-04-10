@@ -15,3 +15,4 @@ id = "ce86b6956b3b46419a7119d1fda95cd3"
 
 # Sekrety (wrangler secret put):
 #   ADMIN_SECRET — jak w ceidg-sync
+#   SERPER_API_KEY — klucz do serper.dev

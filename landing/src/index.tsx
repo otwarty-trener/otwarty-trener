@@ -259,20 +259,37 @@ app.get("/zasady", (c) =>
 
     <h2>Skąd dane</h2>
     <p>Z <a href="https://dane.biznes.gov.pl" rel="noopener">CEIDG</a> — publiczny rejestr firm. Pobieramy: imię, nazwisko, nazwa firmy, miasto, NIP, kody PKD. Nie pobieramy: e-mail, telefon, adres zamieszkania, REGON.</p>
-    <p>Szukamy też publicznych fanpage'y i stron firmowych. Tylko to co widzi każdy w internecie.</p>
+
+    <h2>Linki do profili społecznościowych</h2>
+    <p>Wyszukujemy w Google publiczne fanpage'e i strony firmowe trenerów (Facebook, Instagram, YouTube itp.). Zapisujemy wyłącznie <strong>link do profilu</strong> i tytuł strony z wyników wyszukiwarki.</p>
+    <p>Czego <strong>nie robimy</strong>:</p>
+    <ul>
+      <li>Nie wchodzimy na Twój profil automatycznie (zero scrapingu)</li>
+      <li>Nie pobieramy zdjęć, postów, listy znajomych ani żadnych treści z portalu</li>
+      <li>Nie tworzymy kopii Twojego profilu</li>
+    </ul>
+    <p>Co <strong>robimy</strong>:</p>
+    <ul>
+      <li>Wyszukujemy w Google po imieniu, nazwisku i mieście z CEIDG</li>
+      <li>Dopasowujemy znaleziony link do wpisu w katalogu</li>
+      <li>Admin ręcznie weryfikuje i zatwierdza lub odrzuca każde dopasowanie</li>
+      <li>Na wizytówce wyświetlamy wyłącznie link „Zobacz profil" do portalu</li>
+    </ul>
+    <p>Nie chcesz linku do profilu w katalogu? <a href="/opt-out">/opt-out</a> — usuniemy natychmiast, bez pytań. <a href="/linki-info">Pełna informacja (art. 14 RODO)</a>.</p>
 
     <h2>Otwarte dane</h2>
     <p>Katalog jest otwarty. Dane dostępne przez <a href="/catalog.json">API</a>, <a href="/llms.txt">llms.txt</a>, <a href="/sitemap.xml">sitemap</a>. Mogą z nich korzystać aplikacje, platformy i agenci AI. Jeśli masz konto — możesz pobrać swoje dane w dowolnym momencie. Zero locka.</p>
 
     <h2>Podstawa prawna</h2>
-    <p>Uzasadniony interes (art. 6.1.f RODO) — łączymy trenerów z klientami. Przy rejestracji — umowa (art. 6.1.b RODO).</p>
+    <p>Uzasadniony interes (art. 6.1.f RODO) — łączymy trenerów z klientami. Dotyczy zarówno danych z CEIDG, jak i linków do publicznych profili społecznościowych. Przy rejestracji — umowa (art. 6.1.b RODO).</p>
 
     <h2>Twoje prawa</h2>
     <ul>
-      <li>Usunięcie — <a href="/opt-out">/opt-out</a>, natychmiast, bez pytań</li>
+      <li>Usunięcie wpisu i linków — <a href="/opt-out">/opt-out</a>, natychmiast, bez pytań</li>
       <li>Dostęp — napisz, wyślemy co mamy</li>
       <li>Poprawka — napisz lub edytuj po rejestracji</li>
-      <li>Sprzeciw, przenoszenie, ograniczenie — napisz</li>
+      <li>Sprzeciw wobec linków do profili — <a href="/opt-out">/opt-out</a> usuwa wszystko</li>
+      <li>Przenoszenie, ograniczenie — napisz</li>
     </ul>
 
     <h2>Czego nie robimy</h2>
@@ -295,6 +312,43 @@ app.get("/zasady", (c) =>
     <p>E-mail: [do uzupełnienia]</p>
 
     <p><small>Krótko, bo szanujemy Twój czas.</small></p>`
+  ))
+);
+
+app.get("/linki-info", (c) =>
+  c.html(page(
+    { title: "Informacja o linkach do profili — Otwarty Trener", description: "Informacja o przetwarzaniu linków do profili społecznościowych w katalogu Otwarty Trener (art. 14 RODO)." },
+    `<h1>Informacja o linkach do profili społecznościowych</h1>
+    <p><small>Na podstawie art. 14 RODO</small></p>
+
+    <h2>Kto przetwarza dane</h2>
+    <p>Otwarty Trener — otwarty katalog trenerów personalnych w Polsce.</p>
+
+    <h2>Co przetwarzamy</h2>
+    <p>Link do Twojego publicznego profilu na portalu społecznościowym (Facebook, Instagram, YouTube itp.) oraz tytuł strony widoczny w wynikach wyszukiwarki Google.</p>
+    <p>Nie pobieramy żadnych treści z portalu — zdjęć, postów, listy znajomych ani innych danych.</p>
+
+    <h2>Skąd mamy link</h2>
+    <p>Z publicznych wyników wyszukiwarki Google. Szukamy po imieniu, nazwisku i mieście z rejestru CEIDG. Każde dopasowanie jest ręcznie weryfikowane i zatwierdzane przez administratora.</p>
+
+    <h2>Po co</h2>
+    <p>Aby osoby szukające trenera mogły łatwiej zweryfikować, że wizytówka w katalogu należy do aktywnego trenera, i odwiedzić jego profil.</p>
+
+    <h2>Podstawa prawna</h2>
+    <p>Uzasadniony interes administratora (art. 6 ust. 1 lit. f RODO) — ułatwienie kontaktu między trenerami a potencjalnymi klientami.</p>
+
+    <h2>Twoje prawa</h2>
+    <ul>
+      <li><strong>Sprzeciw i usunięcie</strong> — <a href="/opt-out">/opt-out</a>, natychmiast, bez pytań. Usuniemy wpis i wszystkie powiązane linki.</li>
+      <li><strong>Dostęp</strong> — napisz, wyślemy co mamy.</li>
+      <li><strong>Poprawka</strong> — napisz lub edytuj po przejęciu profilu.</li>
+    </ul>
+
+    <h2>Jak długo przechowujemy</h2>
+    <p>Do momentu sprzeciwu lub usunięcia profilu z katalogu.</p>
+
+    <h2>Kontakt</h2>
+    <p>E-mail: [do uzupełnienia]</p>`
   ))
 );
 
