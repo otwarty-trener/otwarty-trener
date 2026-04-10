@@ -1,14 +1,24 @@
 import { Hono } from "hono";
 import { layout, profileCard, profileArticle, esc } from "@press2ai/theme-specialist-glossy/templates";
-import { catalogHero, catalogGrid, statBar, categoryNav, steps, trustBlock, pagination } from "@press2ai/theme-specialist-glossy/catalog";
+import { catalogHero, catalogGrid, statBar, categoryNav, steps, pagination } from "@press2ai/theme-specialist-glossy/catalog";
 import type { Profile } from "@press2ai/theme-specialist-glossy";
 import type { Bindings, Lead } from "./types";
-import cssText from "@press2ai/theme-specialist-glossy/styles/glossy.css";
+import { composeCss } from "@press2ai/theme-specialist-glossy/styles";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
 app.onError((err, c) => c.json({ error: err.message, stack: err.stack }, 500));
 
+/** KV cache helper. Użycie: const data = await cached(kv, "key", 86400, () => heavyQuery()); */
+async function cached<T>(kv: KVNamespace, key: string, ttl: number, fn: () => Promise<T>): Promise<T> {
+  const hit = await kv.get(key);
+  if (hit) return JSON.parse(hit) as T;
+  const data = await fn();
+  await kv.put(key, JSON.stringify(data), { expirationTtl: ttl });
+  return data;
+}
+
+const cssText = composeCss('hero', 'statBar', 'categoryNav', 'steps', 'catalogGrid', 'profileCard', 'profileArticle', 'pagination', 'forms');
 const CSS_TAG = `<style>${cssText}</style>`;
 const SITE_DESC = "Otwarta baza trenerów personalnych i instruktorów w Polsce. Dane z CEIDG, bezpłatny dostęp, zweryfikowane wpisy.";
 
@@ -31,6 +41,7 @@ function page(opts: PageOpts, body: string): string {
 <section>
 <strong>Dla trenerów</strong>
 <a href="/opt-out">Usuń wpis</a>
+<a href="/zasady">Zasady i prywatność</a>
 </section>
 <section>
 <strong>Dla deweloperów</strong>
@@ -161,7 +172,7 @@ app.get("/", async (c) => {
   const hero = catalogHero({
     badge: "Dane z publicznego rejestru CEIDG",
     title: "Znajdź trenera w Twojej okolicy",
-    subtitle: `${total.toLocaleString("pl")} trenerów z ${cities.total} miast w Polsce. Zweryfikowane dane z CEIDG, bezpłatny dostęp.`,
+    subtitle: "Otwarty katalog trenerów w Polsce. Dane z publicznego rejestru, bezpłatnie i bez rejestracji.",
     searchAction: "/",
     searchPlaceholder: "Szukaj po nazwisku, mieście lub firmie...",
     searchValue: q,
@@ -202,36 +213,90 @@ app.get("/", async (c) => {
 });
 
 app.get("/catalog.json", async (c) => {
-  const { leads } = await listLeads(c.env.DB, 10000, 0);
-  return c.json({
-    version: 1, source: "ceidg", count: leads.length,
-    items: leads.map((l) => ({
-      slug: l.slug, firstName: l.first_name, lastName: l.last_name,
-      city: l.city, companyName: l.company_name, claimed: !!l.claimed, url: "/" + l.slug,
-    })),
+  const data = await cached(c.env.CACHE, "page:catalog.json", 86400, async () => {
+    const { leads } = await listLeads(c.env.DB, 10000, 0);
+    return {
+      version: 1, source: "ceidg", count: leads.length,
+      items: leads.map((l) => ({
+        slug: l.slug, firstName: l.first_name, lastName: l.last_name,
+        city: l.city, companyName: l.company_name, claimed: !!l.claimed, url: "/" + l.slug,
+      })),
+    };
   });
+  return c.json(data);
 });
 
 app.get("/llms.txt", async (c) => {
-  const { leads } = await listLeads(c.env.DB, 10000, 0);
-  return c.text(
-    ["# Otwarty Trener", "Otwarta baza trenerów personalnych w Polsce (dane z CEIDG).", "",
+  const text = await cached(c.env.CACHE, "page:llms.txt", 86400, async () => {
+    const { leads } = await listLeads(c.env.DB, 10000, 0);
+    return ["# Otwarty Trener", "Otwarta baza trenerów personalnych w Polsce (dane z CEIDG).", "",
      "## Trenerzy",
      ...leads.map((l) => `- ${l.first_name} ${l.last_name} (${l.city}) — /${l.slug}`)
-    ].join("\n")
-  );
+    ].join("\n");
+  });
+  return c.text(text);
 });
 
 app.get("/sitemap.xml", async (c) => {
-  const { leads } = await listLeads(c.env.DB, 10000);
   const host = new URL(c.req.url).origin;
-  const urls = [host + "/", ...leads.map((l) => host + "/" + l.slug)];
-  return c.body(
-    '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-    urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n") + "\n</urlset>",
-    200, { "content-type": "application/xml" }
-  );
+  const xml = await cached(c.env.CACHE, `page:sitemap:${host}`, 86400, async () => {
+    const { leads } = await listLeads(c.env.DB, 10000);
+    const urls = [host + "/", ...leads.map((l) => host + "/" + l.slug)];
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+      urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n") + "\n</urlset>";
+  });
+  return c.body(xml, 200, { "content-type": "application/xml" });
 });
+
+app.get("/zasady", (c) =>
+  c.html(page(
+    { title: "Zasady i prywatność — Otwarty Trener", description: "Zasady korzystania, polityka prywatności i regulamin serwisu Otwarty Trener." },
+    `<h1>Zasady i prywatność</h1>
+    <p><small>Aktualizacja: 10 kwietnia 2026</small></p>
+
+    <h2>Co to jest</h2>
+    <p>Otwarty katalog trenerów personalnych w Polsce. Dane z publicznego rejestru CEIDG. Bezpłatny dostęp.</p>
+
+    <h2>Skąd dane</h2>
+    <p>Z <a href="https://dane.biznes.gov.pl" rel="noopener">CEIDG</a> — publiczny rejestr firm. Pobieramy: imię, nazwisko, nazwa firmy, miasto, NIP, kody PKD. Nie pobieramy: e-mail, telefon, adres zamieszkania, REGON.</p>
+    <p>Szukamy też publicznych fanpage'y i stron firmowych. Tylko to co widzi każdy w internecie.</p>
+
+    <h2>Otwarte dane</h2>
+    <p>Katalog jest otwarty. Dane dostępne przez <a href="/catalog.json">API</a>, <a href="/llms.txt">llms.txt</a>, <a href="/sitemap.xml">sitemap</a>. Mogą z nich korzystać aplikacje, platformy i agenci AI. Jeśli masz konto — możesz pobrać swoje dane w dowolnym momencie. Zero locka.</p>
+
+    <h2>Podstawa prawna</h2>
+    <p>Uzasadniony interes (art. 6.1.f RODO) — łączymy trenerów z klientami. Przy rejestracji — umowa (art. 6.1.b RODO).</p>
+
+    <h2>Twoje prawa</h2>
+    <ul>
+      <li>Usunięcie — <a href="/opt-out">/opt-out</a>, natychmiast, bez pytań</li>
+      <li>Dostęp — napisz, wyślemy co mamy</li>
+      <li>Poprawka — napisz lub edytuj po rejestracji</li>
+      <li>Sprzeciw, przenoszenie, ograniczenie — napisz</li>
+    </ul>
+
+    <h2>Czego nie robimy</h2>
+    <p>Nie sprzedajemy danych. Nie profilujemy. Nie śledzimy. Nie wysyłamy spamu. Brak Google Analytics, brak pikseli, brak cookies marketingowych.</p>
+
+    <h2>Infrastruktura</h2>
+    <p>Cloudflare Workers + D1. Dane w UE. To jedyny podmiot przetwarzający.</p>
+
+    <h2>Regulamin</h2>
+    <ol>
+      <li>Katalog jest bezpłatny i otwarty</li>
+      <li>Dane pochodzą z publicznego rejestru CEIDG</li>
+      <li>Każdy trener może usunąć swój wpis przez <a href="/opt-out">/opt-out</a></li>
+      <li>Każdy trener może przejąć swój profil i edytować go</li>
+      <li>Zabrania się kopiowania danych w celu budowania zamkniętych baz</li>
+      <li>Korzystanie z API jest dozwolone z podaniem źródła</li>
+    </ol>
+
+    <h2>Kontakt</h2>
+    <p>E-mail: [do uzupełnienia]</p>
+
+    <p><small>Krótko, bo szanujemy Twój czas.</small></p>`
+  ))
+);
 
 app.get("/opt-out", (c) =>
   c.html(page(
