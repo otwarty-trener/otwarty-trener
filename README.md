@@ -1,21 +1,23 @@
-# OTWARTY-TRENER (workspace organizacji)
+# OTWARTY-TRENER
 
-Lokalny workspace dla GitHub org [`otwarty-trener`](https://github.com/otwarty-trener).
-**Każdy podfolder = jedno repo.** Workspace nie ma własnego gita.
+Otwarta baza trenerów personalnych w Polsce. Dane z CEIDG, bezpłatny dostęp.
+
+**GitHub org:** [`otwarty-trener`](https://github.com/otwarty-trener) · **Live:** https://otwarty-trener-landing.gotoreadyai.workers.dev
 
 ## Repozytoria
 
-| Folder | Hosting | Live |
+| Folder | Opis | Hosting |
 |---|---|---|
-| `landing/` | Cloudflare Workers (Hono) | https://otwarty-trener-landing.gotoreadyai.workers.dev |
-| `ceidg-sync/` | Cloudflare Workers (cron) | https://ceidg-sync.gotoreadyai.workers.dev |
+| `landing/` | Katalog trenerów (Hono SSR) | Cloudflare Workers |
+| `ceidg-sync/` | Import danych z CEIDG (cron) | Cloudflare Workers |
+| `fb-sync/` | Matching profili Facebook | Cloudflare Workers |
 
 ## Architektura
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  CEIDG (rejestr publiczny)                              │
-└──────────────┬──────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│  CEIDG (rejestr publiczny)          │
+└──────────────┬──────────────────────┘
                │ cron sync
                ▼
 ┌──────────────────────────┐     ┌────────────────────────┐
@@ -23,27 +25,38 @@ Lokalny workspace dla GitHub org [`otwarty-trener`](https://github.com/otwarty-t
 │  hourly cron, upsert     │     │  leads, cities, pkd    │
 └──────────────────────────┘     └───────────┬────────────┘
                                              │ read
-                                             ▼
-┌──────────────────────────────────────────────────────────┐
-│  landing (CF Worker, Hono)                                        │
-│  @press2ai/theme-specialist-glossy@0.4.0 templates (pure functions)│
-│  specialist.css inline, SSR, katalog + wizytówki                  │
-└──────────────────────┬───────────────────────────────────┘
-                       │ claimed → 302
-                       ▼
-┌──────────────────────────────────────────────────────────┐
-│  profile-{slug} (GitHub Pages, Astro)                             │
-│  @press2ai/theme-specialist-glossy@0.4.0 Astro components         │
-│  Ten sam CSS, ten sam design — zero rozjazdu                       │
-└──────────────────────────────────────────────────────────┘
+               ┌─────────────────────────────┤
+               ▼                             ▼
+┌──────────────────────┐     ┌──────────────────────────────┐
+│  fb-sync (CF Worker) │     │  landing (CF Worker, Hono)   │
+│  Facebook matching   │     │  composeCss + templates      │
+└──────────────────────┘     │  SSR, katalog + wizytówki    │
+                             └──────────┬───────────────────┘
+                                        │ claimed → 302
+                                        ▼
+                             ┌──────────────────────────────┐
+                             │  profile-{slug} (GH Pages)   │
+                             │  Astro + theme components    │
+                             └──────────────────────────────┘
 ```
 
-**Design system:** `@press2ai/theme-specialist-glossy` — classless CSS + pure template functions. Jeden pakiet, dwa frameworki (Hono + Astro), identyczny output HTML.
+## Design system
 
-## Topic discovery
+`@press2ai/theme-specialist-glossy@0.11.1` — classless CSS + pure template functions.
 
-Każde repo profilu MUSI mieć GitHub topic **`otwarty-trener-profile`**:
+- **Hono:** `composeCss('hero', 'statBar', ...)` — składa CSS z użytych komponentów
+- **Astro:** `import glossy.css` — pełny bundle
+- **Bloki:** `catalogHero`, `catalogGrid`, `statBar`, `steps`, `profileCard`, `profileArticle`, `pagination`
+- **Zero klas CSS** — selektory strukturalne (`section:has`, `[itemscope]`, `[aria-label]`)
 
-```bash
-gh api -X PUT repos/otwarty-trener/profile-X/topics -f names[]=otwarty-trener-profile
-```
+## Endpointy
+
+| Path | Opis |
+|---|---|
+| `/` | Katalog z wyszukiwarką |
+| `/:slug` | Wizytówka trenera |
+| `/zasady` | Zasady i prywatność |
+| `/opt-out` | Usunięcie wpisu |
+| `/catalog.json` | API (JSON) |
+| `/llms.txt` | Pointer dla LLM crawlerów |
+| `/sitemap.xml` | Sitemap |
