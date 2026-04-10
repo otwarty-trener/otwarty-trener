@@ -37,7 +37,7 @@
 | Wyszukiwarka | Filtr po mieście, PKD, nazwisku |
 | SEO | Meta descriptions per profil, Open Graph images |
 | AI endpoints | MCP-style actions w ai-profile manifest (v0.5.0 theme-specialist-glossy) |
-| Nowe warianty | `theme-specialist-stripe` (korporacyjny), `theme-specialist-brutalist` (surowy) — wymienne shelle, ten sam HTML contract |
+| Nowe warianty | `theme-specialist-corporate` (korporacyjny), `theme-specialist-brutalist` (surowy) — wymienne shelle, ten sam HTML contract |
 | `npm create press2ai` | Scaffold nowego profilu jednym poleceniem |
 
 ## Ostrzeżenia operacyjne

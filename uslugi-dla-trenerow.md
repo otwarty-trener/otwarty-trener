@@ -41,7 +41,7 @@
 ## OTWARTY SKLEP — jeden mega mocny ficzer zamiast wielu
 
 Koncept: trening = produkt. Jeden sklep, jeden checkout, jeden dashboard.
-Trener nie potrzebuje Stripe + Calendly + Gumroad + Teachable + Shopify.
+Trener nie potrzebuje pięciu osobnych platform do płatności, kalendarza, kursów i sklepu.
 Monetyzacja: prowizja od transakcji, zero miesiecznych na start.
 
 **Co trener sprzedaje w sklepie:**
